@@ -7,28 +7,36 @@ import java.net.URL;
 public class Wget implements Runnable {
     private final String url;
     private final int speed;
+    private final String outputFileName;
 
-    public Wget(String url, int speed) {
+    public Wget(String url, int speed, String outputFileName) {
         this.url = url;
         this.speed = speed;
+        this.outputFileName = outputFileName;
     }
 
     @Override
     public void run() {
         try (InputStream input = new URL(url).openStream();
-             FileOutputStream output = new FileOutputStream("downloaded_file")) {
+             FileOutputStream output = new FileOutputStream(outputFileName)) {
 
             byte[] buffer = new byte[1024];
             int bytesRead;
+            long startTime = System.currentTimeMillis();
+            int totalBytesRead = 0;
+
             while ((bytesRead = input.read(buffer, 0, 1024)) != -1) {
-                long startTime = System.currentTimeMillis();
                 output.write(buffer, 0, bytesRead);
+                totalBytesRead += bytesRead;
 
-                long elapsedTime = System.currentTimeMillis() - startTime;
-                int expectedTime = bytesRead / speed;
+                if (totalBytesRead == speed) {
+                    long elapsedTime = System.currentTimeMillis() - startTime;
+                    if (elapsedTime < 1000) {
+                        Thread.sleep(1000 - elapsedTime);
+                    }
 
-                if (elapsedTime < expectedTime) {
-                    Thread.sleep(expectedTime - elapsedTime);
+                    totalBytesRead = 0;
+                    startTime = System.currentTimeMillis();
                 }
             }
         } catch (Exception e) {
@@ -37,13 +45,15 @@ public class Wget implements Runnable {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        if (args.length != 2) {
-            System.out.println("Usage: java Wget <URL> <Speed>");
-            return;
+        if (args.length != 3) {
+            throw new IllegalArgumentException("Usage: java Wget <URL> <Speed> <FileName>");
         }
+
         String url = args[0];
         int speed = Integer.parseInt(args[1]);
-        Thread wget = new Thread(new Wget(url, speed));
+        String outputFileName = args[2];
+
+        Thread wget = new Thread(new Wget(url, speed, outputFileName));
         wget.start();
         wget.join();
     }
