@@ -29,7 +29,7 @@ public class Wget implements Runnable {
                 output.write(buffer, 0, bytesRead);
                 totalBytesRead += bytesRead;
 
-                if (totalBytesRead == speed) {
+                if (totalBytesRead >= speed) {
                     long elapsedTime = System.currentTimeMillis() - startTime;
                     if (elapsedTime < 1000) {
                         Thread.sleep(1000 - elapsedTime);
