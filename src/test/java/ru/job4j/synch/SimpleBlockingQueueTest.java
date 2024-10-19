@@ -2,6 +2,9 @@ package ru.job4j.synch;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.IntStream;
+
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -52,5 +55,44 @@ class SimpleBlockingQueueTest {
         queue.offer(1);
         consumer.join();
         assertTrue(queue.isEmpty());
+    }
+
+    @Test
+    public void whenFetchAllThenGetIt() throws InterruptedException {
+        final CopyOnWriteArrayList<Integer> buffer = new CopyOnWriteArrayList<>();
+        final SimpleBlockingQueue<Integer> queue = new SimpleBlockingQueue<>(10);
+
+        Thread producer = new Thread(
+                () -> {
+                    IntStream.range(0, 10).forEach(
+                            queue::offer
+                    );
+                }
+        );
+
+
+        Thread consumer = new Thread(
+                () -> {
+                    try {
+                        while (!Thread.currentThread().isInterrupted() || !queue.isEmpty()) {
+                            Integer value = queue.poll();
+                            buffer.add(value);
+                        }
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+        );
+
+        producer.start();
+        consumer.start();
+
+        producer.join();
+
+        consumer.interrupt();
+
+        consumer.join();
+
+        assertThat(buffer).containsExactly(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
     }
 }
