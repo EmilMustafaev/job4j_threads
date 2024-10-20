@@ -7,43 +7,37 @@ public class ParallelSearch {
 
         final Thread consumer = new Thread(
                 () -> {
-                    while (true) {
+                    while (!Thread.currentThread().isInterrupted()) {
                         try {
+
                             Integer value = queue.poll();
-                            if (value == null) {
-                                System.out.println("Потребитель получил маркер о завершении работы : " + value);
-                                break;
-                            }
-                            System.out.println("Потребитель извлек элемент " + value);
+                            System.out.println("Потребитель извлек элемент: " + value);
                         } catch (InterruptedException e) {
+
+                            System.out.println("Потребитель завершил свою работу");
                             Thread.currentThread().interrupt();
                         }
                     }
                 }
         );
+
         consumer.start();
 
-        new Thread(
+        Thread producer = new Thread(
                 () -> {
                     for (int index = 0; index != 3; index++) {
                         try {
                             queue.offer(index);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                        }
-                        System.out.println("Производитель добавил элемент " + index);
-                        try {
+                            System.out.println("Производитель добавил элемент: " + index);
                             Thread.sleep(500);
                         } catch (InterruptedException e) {
                             Thread.currentThread().interrupt();
                         }
                     }
-                    try {
-                        queue.offer(null);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
+                    consumer.interrupt();
                 }
-        ).start();
+        );
+
+        producer.start();
     }
 }
