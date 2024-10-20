@@ -23,7 +23,13 @@ class SimpleBlockingQueueTest {
         queue.offer(1);
         queue.offer(2);
 
-        Thread producer = new Thread(() -> queue.offer(3));
+        Thread producer = new Thread(() -> {
+            try {
+                queue.offer(3);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
         producer.start();
 
         Thread.sleep(100);
@@ -63,13 +69,14 @@ class SimpleBlockingQueueTest {
         final SimpleBlockingQueue<Integer> queue = new SimpleBlockingQueue<>(10);
 
         Thread producer = new Thread(
-                () -> {
-                    IntStream.range(0, 10).forEach(
-                            queue::offer
-                    );
-                }
+                () -> IntStream.range(0, 10).forEach(value -> {
+                    try {
+                        queue.offer(value);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                })
         );
-
 
         Thread consumer = new Thread(
                 () -> {
@@ -94,5 +101,6 @@ class SimpleBlockingQueueTest {
         consumer.join();
 
         assertThat(buffer).containsExactly(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+
     }
 }

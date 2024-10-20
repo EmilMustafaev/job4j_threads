@@ -26,7 +26,11 @@ public class ParallelSearch {
         new Thread(
                 () -> {
                     for (int index = 0; index != 3; index++) {
-                        queue.offer(index);
+                        try {
+                            queue.offer(index);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
                         System.out.println("Производитель добавил элемент " + index);
                         try {
                             Thread.sleep(500);
@@ -34,7 +38,11 @@ public class ParallelSearch {
                             Thread.currentThread().interrupt();
                         }
                     }
-                    queue.offer(null);
+                    try {
+                        queue.offer(null);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
                 }
         ).start();
     }
