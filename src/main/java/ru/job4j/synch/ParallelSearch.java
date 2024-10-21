@@ -34,10 +34,17 @@ public class ParallelSearch {
                             Thread.currentThread().interrupt();
                         }
                     }
-                    consumer.interrupt();
                 }
         );
 
         producer.start();
+
+        try {
+            producer.join();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        consumer.interrupt();
     }
-}
+    }
