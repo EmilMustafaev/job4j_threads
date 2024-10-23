@@ -14,7 +14,7 @@ public class ThreadPool {
         for (int i = 0; i < size; i++) {
             Thread thread = new Thread(() -> {
                 try {
-                    while (!Thread.currentThread().isInterrupted() && !tasks.isEmpty()) {
+                    while (!Thread.currentThread().isInterrupted()) {
                         Runnable task = tasks.poll();
                         if (task != null) {
                             task.run();
@@ -30,7 +30,7 @@ public class ThreadPool {
     }
 
     public void work(Runnable job) throws InterruptedException {
-            tasks.offer(job);
+        tasks.offer(job);
     }
 
     public void shutdown() {
