@@ -11,6 +11,7 @@ public class Sums {
         this.colSum = colSum;
     }
 
+
     public int getRowSum() {
         return rowSum;
     }

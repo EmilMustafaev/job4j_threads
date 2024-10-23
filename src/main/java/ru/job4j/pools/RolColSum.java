@@ -5,7 +5,6 @@ import java.util.concurrent.ExecutionException;
 
 public class RolColSum {
 
-
     private static Sums calculateSums(int[][] matrix, int index) {
         int rowSum = 0;
         int colSum = 0;

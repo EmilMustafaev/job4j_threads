@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 class RolColSumTest {
+
     @Test
     void whenSumThenCorrectSums() {
         int[][] matrix = {
